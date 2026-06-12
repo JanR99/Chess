@@ -1,6 +1,7 @@
 package pieces;
 
 import model.Board;
+import model.Move;
 import model.Piece;
 import model.Position;
 
@@ -13,7 +14,9 @@ public class Knight extends Piece {
     }
 
     @Override
-    public boolean isValidMove(Board board, Position from, Position to) {
+    public boolean isValidMove(Board board, Move move) {
+        Position from = move.getFrom();
+        Position to = move.getTo();
         int dx = Math.abs(from.getCol() - to.getCol());
         int dy = Math.abs(from.getRow() - to.getRow());
 

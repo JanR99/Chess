@@ -46,5 +46,5 @@ public abstract class Piece {
         return true;
     }
 
-    public abstract boolean isValidMove(Board board, Position from, Position to);
+    public abstract boolean isValidMove(Board board, Move move);
 }
