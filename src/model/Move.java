@@ -1,6 +1,4 @@
-package game;
-
-import model.Position;
+package model;
 
 public class Move {
 

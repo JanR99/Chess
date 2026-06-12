@@ -1,8 +1,7 @@
 package service;
 
-import game.Move;
+import model.Move;
 import model.Piece;
-import model.Position;
 
 public class MoveValidator {
 

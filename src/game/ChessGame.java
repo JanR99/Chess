@@ -1,6 +1,7 @@
 package game;
 
 import model.Board;
+import model.Move;
 import model.Piece;
 
 public class ChessGame {
