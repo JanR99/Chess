@@ -1,0 +1,42 @@
+package pieces;
+
+import model.Board;
+import model.Piece;
+import model.Position;
+
+import java.awt.*;
+
+public class Queen extends Piece {
+
+    public Queen(Position position, Color color) {
+        super(position, color);
+    }
+
+    @Override
+    public boolean isValidMove(Board board, Position from, Position to) {
+        int dx = Math.abs(to.getCol() - from.getCol());
+        int dy = Math.abs(to.getRow() - from.getRow());
+
+        boolean rookMove = from.getRow() == to.getRow() || from.getCol() == to.getCol();
+        boolean bishopMove = dx == dy;
+        if (!rookMove && !bishopMove) {
+            return false;
+        }
+
+        int rowStep = Integer.compare(to.getRow(), from.getRow());
+        int colStep = Integer.compare(to.getCol(), from.getCol());
+
+        int row = from.getRow() + rowStep;
+        int col = from.getCol() + colStep;
+
+        while (row != to.getRow() || col != to.getCol()) {
+            if (!board.isEmpty(row, col)) {
+                return false;
+            }
+            row += rowStep;
+            col += colStep;
+        }
+
+        return true;
+    }
+}
