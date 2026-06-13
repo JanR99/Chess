@@ -14,8 +14,8 @@ public class Board {
         initializeBoard();
     }
 
-    public Piece getPiece(int row, int col) {
-        return squares[row][col];
+    public Piece getPiece(Position position) {
+        return squares[position.getRow()][position.getCol()];
     }
 
     public void setPiece(Position position, Piece piece) {
@@ -23,8 +23,8 @@ public class Board {
         squares[position.getRow()][position.getCol()] = piece;
     }
 
-    public boolean isEmpty(int row, int col) {
-        return getPiece(row, col) == null;
+    public boolean isEmpty(Position position) {
+        return getPiece(position) == null;
     }
 
     public int getMissingWhites() {
@@ -74,10 +74,10 @@ public class Board {
     }
 
     private void incrementMissingPieces(Position position) {
-        if (isEmpty(position.getRow(), position.getCol())) {
+        if (isEmpty(position)) {
             return;
         }
-        Piece currentPiece = getPiece(position.getRow(), position.getCol());
+        Piece currentPiece = getPiece(position);
         if (currentPiece.getColor().equals(Color.WHITE)) {
             missingWhites++;
         } else {

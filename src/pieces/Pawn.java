@@ -23,11 +23,7 @@ public class Pawn extends Piece {
         int colDiff = to.getCol() - from.getCol();
 
         // 1 square
-        if (colDiff == 0
-                && rowDiff == direction
-                && board.isEmpty(
-                to.getRow(),
-                to.getCol())) {
+        if (colDiff == 0 && rowDiff == direction && board.isEmpty(to)) {
             return true;
         }
 
@@ -35,15 +31,15 @@ public class Pawn extends Piece {
         if (colDiff == 0
                 && from.getRow() == startRow
                 && rowDiff == 2 * direction
-                && board.isEmpty(from.getRow() + direction, from.getCol())
-                && board.isEmpty(to.getRow(), to.getCol())) {
+                && board.isEmpty(new Position(from.getRow() + direction, from.getCol()))
+                && board.isEmpty(to)) {
 
             return true;
         }
 
         // diagonal
         if (Math.abs(colDiff) == 1 && rowDiff == direction) {
-            Piece target = board.getPiece(to.getRow(), to.getCol());
+            Piece target = board.getPiece(to);
             return target != null && target.getColor() != getColor();
         }
         return false;

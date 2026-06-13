@@ -22,8 +22,8 @@ public class ChessGame {
     }
 
     public boolean makeMove(Move move) {
-        Piece piece = board.getPiece(move.getFrom().getRow(), move.getFrom().getCol());
-        Piece target = board.getPiece(move.getTo().getRow(), move.getTo().getCol());
+        Piece piece = board.getPiece(move.getFrom());
+        Piece target = board.getPiece(move.getTo());
 
         if (piece == null || target != null && target.getColor() == piece.getColor()) {
             return false;

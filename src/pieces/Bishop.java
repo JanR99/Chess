@@ -31,7 +31,7 @@ public class Bishop extends Piece {
         int col = from.getCol() + colStep;
 
         while (row != to.getRow()) {
-            if (!board.isEmpty(row, col)) {
+            if (!board.isEmpty(new Position(row, col))) {
                 return false;
             }
             row += rowStep;

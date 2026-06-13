@@ -37,7 +37,7 @@ public abstract class Piece {
         int col = from.getCol() + colStep;
 
         while (row != to.getRow() || col != to.getCol()) {
-            if (!board.isEmpty(row, col)) {
+            if (!board.isEmpty(new Position(row, col))) {
                 return false;
             }
             row += rowStep;
