@@ -7,6 +7,8 @@ import java.awt.*;
 public class Board {
 
     private Piece[][] squares;
+    private int missingWhites = 0;
+    private int missingBlack = 0;
 
     public Board() {
         initializeBoard();
@@ -16,12 +18,29 @@ public class Board {
         return squares[row][col];
     }
 
-    public void setPiece(int row, int col, Piece piece) {
-        squares[row][col] = piece;
+    public void setPiece(Position position, Piece piece) {
+        incrementMissingPieces(position);
+        squares[position.getRow()][position.getCol()] = piece;
     }
 
     public boolean isEmpty(int row, int col) {
         return getPiece(row, col) == null;
+    }
+
+    public int getMissingWhites() {
+        return missingWhites;
+    }
+
+    public void setMissingWhites(int missingWhites) {
+        this.missingWhites = missingWhites;
+    }
+
+    public int getMissingBlack() {
+        return missingBlack;
+    }
+
+    public void setMissingBlack(int missingBlack) {
+        this.missingBlack = missingBlack;
     }
 
     private void initializeBoard() {
@@ -52,5 +71,17 @@ public class Board {
         squares[7][5] = new Bishop( new Position(7, 5), Color.WHITE);
         squares[7][6] = new Knight( new Position(7, 6), Color.WHITE);
         squares[7][7] = new Rook(   new Position(7, 7), Color.WHITE);
+    }
+
+    private void incrementMissingPieces(Position position) {
+        if (isEmpty(position.getRow(), position.getCol())) {
+            return;
+        }
+        Piece currentPiece = getPiece(position.getRow(), position.getCol());
+        if (currentPiece.getColor().equals(Color.WHITE)) {
+            missingWhites++;
+        } else {
+            missingBlack++;
+        }
     }
 }

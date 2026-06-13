@@ -3,6 +3,11 @@ package game;
 import model.Board;
 import model.Move;
 import model.Piece;
+import model.Position;
+import pieces.Pawn;
+import pieces.Queen;
+
+import java.awt.*;
 
 public class ChessGame {
 
@@ -24,12 +29,24 @@ public class ChessGame {
             return false;
         }
 
-        if (piece.isValidMove(board, move.getFrom(), move.getTo())) {
-            // TODO do moving logic here
-
-            return true;
+        if (!piece.isValidMove(board, move)) {
+            return false;
         }
-        return false;
+
+        board.setPiece(move.getTo(), piece);
+        transformPawnToQueenIfLastRow(piece);
+        return true;
+    }
+
+    private void transformPawnToQueenIfLastRow(Piece piece) {
+        if (!(piece instanceof Pawn)) {
+            return;
+        }
+        if (piece.getColor().equals(Color.WHITE) && piece.getPosition().getRow() == Position.LAST_ROW
+                || piece.getColor().equals(Color.BLACK) && piece.getPosition().getRow() == Position.FIRST_ROW) {
+            // TODO let the User decide which Piece
+            piece = new Queen(piece);
+        }
     }
 
     private static ChessGame initChessGame() {

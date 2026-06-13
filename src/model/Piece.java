@@ -12,16 +12,17 @@ public abstract class Piece {
         this.color = color;
     }
 
+    public Piece(Piece piece) {
+        this.position = piece.getPosition();
+        this.color = piece.getColor();
+    }
+
     public Position getPosition() {
         return position;
     }
 
     public void setPosition(Position position) {
         this.position = position;
-    }
-
-    protected Piece(Color color) {
-        this.color = color;
     }
 
     public Color getColor() {

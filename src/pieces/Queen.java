@@ -13,6 +13,10 @@ public class Queen extends Piece {
         super(position, color);
     }
 
+    public Queen(Piece piece) {
+        super(piece);
+    }
+
     @Override
     public boolean isValidMove(Board board, Move move) {
         Position from = move.getFrom();

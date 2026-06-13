@@ -2,6 +2,9 @@ package model;
 
 public class Position {
 
+    public static final int FIRST_ROW = 0;
+    public static final int LAST_ROW = 7;
+
     private int row;
     private int col;
 
