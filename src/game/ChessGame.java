@@ -5,7 +5,6 @@ import pieces.Pawn;
 import pieces.Queen;
 
 import java.awt.*;
-import java.util.Scanner;
 
 public class ChessGame {
 
@@ -13,26 +12,12 @@ public class ChessGame {
     private final Player playerBlack;
     private final Player playerWhite;
     public Color currentColorsTurn = Color.WHITE;
-    private final Scanner scanner = new Scanner(System.in);
     public Position selectedPosition = null;
 
     private ChessGame() {
         this.board = new Board();
         this.playerBlack = new Player(Color.BLACK);
         this.playerWhite = new Player(Color.WHITE);
-    }
-
-    protected void start() {
-        while (true) {
-            board.printBoard();
-            Move move = getInputMove();
-            if (makeMove(move)) {
-                System.out.println("Move accepted");
-                rotatePlayersTurn();
-            } else {
-                System.out.println("Illegal move");
-            }
-        }
     }
 
     protected static ChessGame init() {
@@ -70,7 +55,6 @@ public class ChessGame {
             if (piece != null && piece.getColor().equals(currentColorsTurn)) {
                 selectedPosition = clicked;
             }
-            return false;
         } else {
             // Second click: attempt the move
             Move move = new Move(selectedPosition, clicked);
@@ -84,8 +68,8 @@ public class ChessGame {
             if (piece != null && piece.getColor().equals(currentColorsTurn)) {
                 selectedPosition = clicked;
             }
-            return false;
         }
+        return false;
     }
 
     private void transformPawnToQueenIfLastRow(Piece piece) {
@@ -97,24 +81,6 @@ public class ChessGame {
             // TODO let the User decide which Piece
             board.setPiece(piece.getPosition(), new Queen(piece.getPosition(), piece.getColor()));
         }
-    }
-
-    private Move getInputMove() {
-        System.out.print(currentColorsTurn.equals(Color.WHITE) ? "White move: " : "Black move: ");
-        String input = scanner.nextLine();
-
-        String[] parts = input.split(" ");
-
-        Position from = parsePosition(parts[0]);
-        Position to = parsePosition(parts[1]);
-
-        return new Move(from, to);
-    }
-
-    private Position parsePosition(String field) {
-        int col = field.charAt(0) - 'a';
-        int row = 8 - Character.getNumericValue(field.charAt(1));
-        return new Position(row, col);
     }
 
     private void rotatePlayersTurn() {

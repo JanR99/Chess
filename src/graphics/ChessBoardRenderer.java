@@ -15,9 +15,6 @@ public class ChessBoardRenderer implements IRenderable {
     private final ChessGame game;
     public static final int TILE_SIZE = 80;
 
-    private static final String[] WHITE_SYMBOLS = {"♔", "♕", "♖", "♗", "♘", "♙"};
-    private static final String[] BLACK_SYMBOLS = {"♚", "♛", "♜", "♝", "♞", "♟"};
-
     private static final Color LIGHT_SQUARE  = new Color(240, 217, 181);
     private static final Color DARK_SQUARE   = new Color(181, 136,  99);
     private static final Color HIGHLIGHT     = new Color(255, 255,  0, 120);
