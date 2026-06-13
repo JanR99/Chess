@@ -31,3 +31,5 @@ bin/
 
 ### General ###
 target
+crash.txt
+game.log
