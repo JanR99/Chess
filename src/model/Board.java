@@ -43,6 +43,45 @@ public class Board {
         this.missingBlack = missingBlack;
     }
 
+    public void printBoard() {
+        System.out.println();
+        for (int row = 0; row < 8; row++) {
+            System.out.print(8 - row + " ");
+            for (int col = 0; col < 8; col++) {
+                Piece piece = squares[row][col];
+                if (piece == null) {
+                    System.out.print(". ");
+                } else {
+                    System.out.print(getPieceSymbol(piece) + " ");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("  a b c d e f g h");
+        System.out.println();
+
+        System.out.println("Captured White Pieces: " + missingWhites);
+        System.out.println("Captured Black Pieces: " + missingBlack);
+        System.out.println();
+    }
+
+    private char getPieceSymbol(Piece piece) {
+        char symbol = switch (piece) {
+            case Pawn _ -> 'P';
+            case Rook _ -> 'R';
+            case Knight _ -> 'N';
+            case Bishop _ -> 'B';
+            case Queen _ -> 'Q';
+            case King _ -> 'K';
+            case null, default -> '?';
+        };
+        assert piece != null;
+        if (piece.getColor().equals(Color.BLACK)) {
+            symbol = Character.toLowerCase(symbol);
+        }
+        return symbol;
+    }
+
     private void initializeBoard() {
         squares = new Piece[8][8];
 

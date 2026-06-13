@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class ChessGame {
 
-    private Board board;
+    private final Board board;
     private final Player playerBlack;
     private final Player playerWhite;
     private Color currentColorsTurn = Color.WHITE;
@@ -28,6 +28,7 @@ public class ChessGame {
 
     private void start() {
         while (true) {
+            board.printBoard();
             Move move = getInputMove();
             if (makeMove(move)) {
                 System.out.println("Move accepted");
