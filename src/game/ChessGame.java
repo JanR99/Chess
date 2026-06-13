@@ -12,8 +12,9 @@ public class ChessGame {
     protected final Board board;
     private final Player playerBlack;
     private final Player playerWhite;
-    private Color currentColorsTurn = Color.WHITE;
+    public Color currentColorsTurn = Color.WHITE;
     private final Scanner scanner = new Scanner(System.in);
+    public Position selectedPosition = null;
 
     private ChessGame() {
         this.board = new Board();
@@ -60,6 +61,31 @@ public class ChessGame {
         board.setPiece(move.getFrom(), null);
         transformPawnToQueenIfLastRow(piece);
         return true;
+    }
+
+    public boolean handleSquareClick(Position clicked) {
+        if (selectedPosition == null) {
+            // First click: select a piece belonging to the current player
+            Piece piece = board.getPiece(clicked);
+            if (piece != null && piece.getColor().equals(currentColorsTurn)) {
+                selectedPosition = clicked;
+            }
+            return false;
+        } else {
+            // Second click: attempt the move
+            Move move = new Move(selectedPosition, clicked);
+            selectedPosition = null;  // clear selection regardless of outcome
+            if (makeMove(move)) {
+                rotatePlayersTurn();
+                return true;
+            }
+            // Re-select if they clicked another own piece
+            Piece piece = board.getPiece(clicked);
+            if (piece != null && piece.getColor().equals(currentColorsTurn)) {
+                selectedPosition = clicked;
+            }
+            return false;
+        }
     }
 
     private void transformPawnToQueenIfLastRow(Piece piece) {

@@ -1,6 +1,7 @@
 package graphics;
 
 import de.gurkenlabs.litiengine.graphics.IRenderable;
+import game.ChessGame;
 import model.Board;
 import model.Piece;
 import model.Position;
@@ -11,46 +12,103 @@ import java.awt.*;
 public class ChessBoardRenderer implements IRenderable {
 
     private final Board board;
-    private static final int TILE_SIZE = 80;
+    private final ChessGame game;
+    public static final int TILE_SIZE = 80;
 
-    public ChessBoardRenderer(Board board) {
+    private static final String[] WHITE_SYMBOLS = {"♔", "♕", "♖", "♗", "♘", "♙"};
+    private static final String[] BLACK_SYMBOLS = {"♚", "♛", "♜", "♝", "♞", "♟"};
+
+    private static final Color LIGHT_SQUARE  = new Color(240, 217, 181);
+    private static final Color DARK_SQUARE   = new Color(181, 136,  99);
+    private static final Color HIGHLIGHT     = new Color(255, 255,  0, 120);
+    private static final Color LAST_MOVE_COL = new Color(205, 210,  30, 100);
+
+    public ChessBoardRenderer(Board board, ChessGame game) {
         this.board = board;
+        this.game  = game;
     }
 
     @Override
     public void render(Graphics2D g) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         drawBoard(g);
         drawPieces(g);
+        drawTurnIndicator(g);
     }
 
     private void drawBoard(Graphics2D g) {
+        Position selected = game.selectedPosition;
+
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 boolean light = (row + col) % 2 == 0;
-                g.setColor(light ? Color.WHITE : Color.DARK_GRAY);
+                g.setColor(light ? LIGHT_SQUARE : DARK_SQUARE);
                 g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+                // Highlight selected square
+                if (selected != null && selected.getRow() == row && selected.getCol() == col) {
+                    g.setColor(HIGHLIGHT);
+                    g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
             }
+        }
+
+        // Draw rank/file labels
+        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        for (int i = 0; i < 8; i++) {
+            g.setColor((i % 2 == 0) ? DARK_SQUARE : LIGHT_SQUARE);
+            g.drawString(String.valueOf((char)('a' + i)), i * TILE_SIZE + 4, 8 * TILE_SIZE - 4);
+            g.drawString(String.valueOf(8 - i), 4, i * TILE_SIZE + 14);
         }
     }
 
     private void drawPieces(Graphics2D g) {
+        Font pieceFont = new Font("Serif", Font.PLAIN, 56);
+        g.setFont(pieceFont);
+
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Piece piece = board.getPiece(new Position(row, col));
                 if (piece == null) continue;
-                g.setColor(piece.getColor());
-                g.drawString(getSymbol(piece), col * TILE_SIZE + 30, row * TILE_SIZE + 45);
+
+                String symbol = getUnicodeSymbol(piece);
+                int x = col * TILE_SIZE;
+                int y = row * TILE_SIZE;
+
+                // Draw a subtle shadow first for contrast on both square colors
+                g.setColor(new Color(0, 0, 0, 60));
+                g.drawString(symbol, x + 13, y + 60);
+
+                // Draw the piece
+                g.setColor(piece.getColor().equals(Color.WHITE)
+                        ? new Color(255, 255, 255)
+                        : new Color(20, 20, 20));
+                g.drawString(symbol, x + 12, y + 59);
             }
         }
     }
 
-    private String getSymbol(Piece piece) {
-        if (piece instanceof Pawn) return "P";
-        if (piece instanceof Rook) return "R";
-        if (piece instanceof Knight) return "N";
-        if (piece instanceof Bishop) return "B";
-        if (piece instanceof Queen) return "Q";
-        if (piece instanceof King) return "K";
-        return "?";
+    private void drawTurnIndicator(Graphics2D g) {
+        String turn = game.currentColorsTurn.equals(Color.WHITE) ? "White to move" : "Black to move";
+        g.setFont(new Font("SansSerif", Font.BOLD, 14));
+        g.setColor(new Color(0, 0, 0, 150));
+        g.fillRoundRect(6, 8 * TILE_SIZE + 4, 140, 24, 6, 6);
+        g.setColor(Color.WHITE);
+        g.drawString(turn, 12, 8 * TILE_SIZE + 21);
+    }
+
+    private String getUnicodeSymbol(Piece piece) {
+        boolean white = piece.getColor().equals(Color.WHITE);
+        return switch (piece) {
+            case King _     -> white ? "♔" : "♚";
+            case Queen _    -> white ? "♕" : "♛";
+            case Rook _     -> white ? "♖" : "♜";
+            case Bishop _   -> white ? "♗" : "♝";
+            case Knight _   -> white ? "♘" : "♞";
+            case Pawn _     -> white ? "♙" : "♟";
+            default -> "?";
+        };
     }
 }
