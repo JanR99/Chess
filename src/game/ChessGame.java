@@ -9,16 +9,11 @@ import java.util.Scanner;
 
 public class ChessGame {
 
-    private final Board board;
+    protected final Board board;
     private final Player playerBlack;
     private final Player playerWhite;
     private Color currentColorsTurn = Color.WHITE;
     private final Scanner scanner = new Scanner(System.in);
-
-    static void main(String[] args) {
-        ChessGame game = initChessGame();
-        game.start();
-    }
 
     private ChessGame() {
         this.board = new Board();
@@ -26,7 +21,7 @@ public class ChessGame {
         this.playerWhite = new Player(Color.WHITE);
     }
 
-    private void start() {
+    protected void start() {
         while (true) {
             board.printBoard();
             Move move = getInputMove();
@@ -37,6 +32,10 @@ public class ChessGame {
                 System.out.println("Illegal move");
             }
         }
+    }
+
+    protected static ChessGame init() {
+        return new ChessGame();
     }
 
     public boolean makeMove(Move move) {
@@ -98,9 +97,5 @@ public class ChessGame {
         } else {
             currentColorsTurn = Color.WHITE;
         }
-    }
-
-    private static ChessGame initChessGame() {
-        return new ChessGame();
     }
 }
