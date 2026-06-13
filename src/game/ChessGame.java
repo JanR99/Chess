@@ -13,11 +13,12 @@ public class ChessGame {
     private final Player playerWhite;
     public Color currentColorsTurn = Color.WHITE;
     public Position selectedPosition = null;
+    public boolean endGame = false;
 
     private ChessGame() {
-        this.board = new Board();
         this.playerBlack = new Player(Color.BLACK);
         this.playerWhite = new Player(Color.WHITE);
+        this.board = new Board();
     }
 
     protected static ChessGame init() {
@@ -42,13 +43,20 @@ public class ChessGame {
         if (!piece.isValidMove(board, move)) {
             return false;
         }
-        board.setPiece(move.getTo(), piece);
+        boolean won = board.setPiece(move.getTo(), piece);
+        piece.setPosition(move.getTo());
         board.setPiece(move.getFrom(), null);
+
+        if (won) {
+            endGame = true;
+        }
+
         transformPawnToQueenIfLastRow(piece);
         return true;
     }
 
     public boolean handleSquareClick(Position clicked) {
+        if (endGame) return false;
         if (selectedPosition == null) {
             // First click: select a piece belonging to the current player
             Piece piece = board.getPiece(clicked);
@@ -59,7 +67,8 @@ public class ChessGame {
             // Second click: attempt the move
             Move move = new Move(selectedPosition, clicked);
             selectedPosition = null;  // clear selection regardless of outcome
-            if (makeMove(move)) {
+            boolean moved = makeMove(move);
+            if (moved && !endGame) {
                 rotatePlayersTurn();
                 return true;
             }

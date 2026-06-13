@@ -7,8 +7,6 @@ import java.awt.*;
 public class Board {
 
     private Piece[][] squares;
-    private int missingWhites = 0;
-    private int missingBlack = 0;
 
     public Board() {
         initializeBoard();
@@ -18,68 +16,24 @@ public class Board {
         return squares[position.getRow()][position.getCol()];
     }
 
-    public void setPiece(Position position, Piece piece) {
-        incrementMissingPieces(position);
+    /**
+     * sets the piece to its new position,
+     * @param position the new {@link Position}
+     * @param piece the {@link Piece} to move
+     * @return true if the current player lost his {@link King}
+     */
+    public boolean setPiece(Position position, Piece piece) {
+        boolean won = false;
+        Piece pieceOnSquare = getPiece(position);
+        if (pieceOnSquare instanceof King) {
+            won = true;
+        }
         squares[position.getRow()][position.getCol()] = piece;
+        return won;
     }
 
     public boolean isEmpty(Position position) {
         return getPiece(position) == null;
-    }
-
-    public int getMissingWhites() {
-        return missingWhites;
-    }
-
-    public void setMissingWhites(int missingWhites) {
-        this.missingWhites = missingWhites;
-    }
-
-    public int getMissingBlack() {
-        return missingBlack;
-    }
-
-    public void setMissingBlack(int missingBlack) {
-        this.missingBlack = missingBlack;
-    }
-
-    public void printBoard() {
-        System.out.println();
-        for (int row = 0; row < 8; row++) {
-            System.out.print(8 - row + " ");
-            for (int col = 0; col < 8; col++) {
-                Piece piece = squares[row][col];
-                if (piece == null) {
-                    System.out.print(". ");
-                } else {
-                    System.out.print(getPieceSymbol(piece) + " ");
-                }
-            }
-            System.out.println();
-        }
-        System.out.println("  a b c d e f g h");
-        System.out.println();
-
-        System.out.println("Captured White Pieces: " + missingWhites);
-        System.out.println("Captured Black Pieces: " + missingBlack);
-        System.out.println();
-    }
-
-    private char getPieceSymbol(Piece piece) {
-        char symbol = switch (piece) {
-            case Pawn _ -> 'P';
-            case Rook _ -> 'R';
-            case Knight _ -> 'N';
-            case Bishop _ -> 'B';
-            case Queen _ -> 'Q';
-            case King _ -> 'K';
-            case null, default -> '?';
-        };
-        assert piece != null;
-        if (piece.getColor().equals(Color.BLACK)) {
-            symbol = Character.toLowerCase(symbol);
-        }
-        return symbol;
     }
 
     private void initializeBoard() {
@@ -110,17 +64,5 @@ public class Board {
         squares[7][5] = new Bishop( new Position(7, 5), Color.WHITE);
         squares[7][6] = new Knight( new Position(7, 6), Color.WHITE);
         squares[7][7] = new Rook(   new Position(7, 7), Color.WHITE);
-    }
-
-    private void incrementMissingPieces(Position position) {
-        if (isEmpty(position)) {
-            return;
-        }
-        Piece currentPiece = getPiece(position);
-        if (currentPiece.getColor().equals(Color.WHITE)) {
-            missingWhites++;
-        } else {
-            missingBlack++;
-        }
     }
 }

@@ -18,7 +18,6 @@ public class ChessBoardRenderer implements IRenderable {
     private static final Color LIGHT_SQUARE  = new Color(240, 217, 181);
     private static final Color DARK_SQUARE   = new Color(181, 136,  99);
     private static final Color HIGHLIGHT     = new Color(255, 255,  0, 120);
-    private static final Color LAST_MOVE_COL = new Color(205, 210,  30, 100);
 
     public ChessBoardRenderer(Board board, ChessGame game) {
         this.board = board;
@@ -32,7 +31,36 @@ public class ChessBoardRenderer implements IRenderable {
 
         drawBoard(g);
         drawPieces(g);
-        drawTurnIndicator(g);
+
+        if (game.endGame) {
+            drawWinScreen(g);
+        } else {
+            drawTurnIndicator(g);
+        }
+    }
+
+    private void drawWinScreen(Graphics2D g) {
+        String winner = game.currentColorsTurn.equals(Color.WHITE) ? "White" : "Black";
+
+        g.setColor(new Color(0, 0, 0, 160));
+        g.fillRect(0, 0, 8 * TILE_SIZE, 8 * TILE_SIZE);
+
+        // Winner banner
+        g.setColor(new Color(255, 215, 0));  // gold
+        g.setFont(new Font("SansSerif", Font.BOLD, 48));
+        FontMetrics fm = g.getFontMetrics();
+        String line1 = winner + " wins!";
+        g.drawString(line1,
+                (8 * TILE_SIZE - fm.stringWidth(line1)) / 2,
+                (8 * TILE_SIZE) / 2 - 10);
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        fm = g.getFontMetrics();
+        String line2 = "Close the window to exit.";
+        g.drawString(line2,
+                (8 * TILE_SIZE - fm.stringWidth(line2)) / 2,
+                (8 * TILE_SIZE) / 2 + 30);
     }
 
     private void drawBoard(Graphics2D g) {
