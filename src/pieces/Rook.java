@@ -9,8 +9,19 @@ import java.awt.*;
 
 public class Rook extends Piece {
 
+    private boolean alreadyMoved;
+
     public Rook(Position position, Color color) {
         super(position, color);
+        this.alreadyMoved = false;
+    }
+
+    public boolean getAlreadyMoved() {
+        return this.alreadyMoved;
+    }
+
+    public void setAlreadyMoved(boolean alreadyMoved) {
+        this.alreadyMoved = alreadyMoved;
     }
 
     @Override

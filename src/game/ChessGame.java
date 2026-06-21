@@ -1,8 +1,10 @@
 package game;
 
 import model.*;
+import pieces.King;
 import pieces.Pawn;
 import pieces.Queen;
+import pieces.Rook;
 
 import java.awt.*;
 
@@ -43,8 +45,20 @@ public class ChessGame {
         if (!piece.isValidMove(board, move)) {
             return false;
         }
+
+        if (isCastlingMove(piece, move)) {
+            moveCastlingRook(move);
+        }
+
         boolean won = board.setPiece(move.getTo(), piece);
         piece.setPosition(move.getTo());
+        if (piece instanceof King king) {
+            king.setAlreadyMoved(true);
+        }
+
+        if (piece instanceof Rook rook) {
+            rook.setAlreadyMoved(true);
+        }
         board.setPiece(move.getFrom(), null);
 
         if (won) {
@@ -98,5 +112,40 @@ public class ChessGame {
         } else {
             currentColorsTurn = Color.WHITE;
         }
+    }
+
+    private void moveCastlingRook(Move kingMove) {
+        int row = kingMove.getFrom().getRow();
+        Position rookFrom;
+        Position rookTo;
+        if (kingMove.getTo().getCol() > kingMove.getFrom().getCol()) {
+            rookFrom = new Position(row, Position.LAST_COLUMN);
+            rookTo = new Position(row, kingMove.getTo().getCol() - 1);
+        } else {
+            rookFrom = new Position(row, Position.FIRST_COLUMN);
+            rookTo = new Position(row, kingMove.getTo().getCol() + 1);
+        }
+        moveRook(new Move(rookFrom, rookTo));
+    }
+
+    private void moveRook(Move move) {
+        Piece piece = board.getPiece(move.getFrom());
+
+        if (!(piece instanceof Rook rook)) {
+            return;
+        }
+
+        board.setPiece(move.getTo(), rook);
+        board.setPiece(move.getFrom(), null);
+        rook.setPosition(move.getTo());
+        rook.setAlreadyMoved(true);
+    }
+
+    private boolean isCastlingMove(Piece piece, Move move) {
+        if (!(piece instanceof King)) {
+            return false;
+        }
+        return move.getFrom().getRow() == move.getTo().getRow()
+                && Math.abs(move.getFrom().getCol() - move.getTo().getCol()) == 2;
     }
 }
