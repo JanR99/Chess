@@ -52,13 +52,7 @@ public class ChessGame {
 
         boolean won = board.setPiece(move.getTo(), piece);
         piece.setPosition(move.getTo());
-        if (piece instanceof King king) {
-            king.setAlreadyMoved(true);
-        }
-
-        if (piece instanceof Rook rook) {
-            rook.setAlreadyMoved(true);
-        }
+        setAlreadyMoved(piece);
         board.setPiece(move.getFrom(), null);
 
         if (won) {
@@ -93,6 +87,16 @@ public class ChessGame {
             }
         }
         return false;
+    }
+
+    private void setAlreadyMoved(Piece piece) {
+        if (piece instanceof King king) {
+            king.setAlreadyMoved(true);
+        }
+
+        if (piece instanceof Rook rook) {
+            rook.setAlreadyMoved(true);
+        }
     }
 
     private void transformPawnToQueenIfLastRow(Piece piece) {
