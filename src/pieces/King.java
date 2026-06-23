@@ -16,10 +16,6 @@ public class King extends Piece {
         this.alreadyMoved = false;
     }
 
-    public boolean getAlreadyMoved() {
-        return this.alreadyMoved;
-    }
-
     public void setAlreadyMoved(boolean alreadyMoved) {
         this.alreadyMoved = alreadyMoved;
     }
