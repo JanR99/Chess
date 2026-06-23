@@ -56,6 +56,8 @@ public class ChessGame {
             endGame = true;
         }
 
+        // TODO: Print Check if there is a check!
+
         transformPawnToQueenIfLastRow(piece);
         return true;
     }
