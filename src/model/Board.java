@@ -18,22 +18,73 @@ public class Board {
 
     /**
      * sets the piece to its new position,
+     *
      * @param position the new {@link Position}
-     * @param piece the {@link Piece} to move
-     * @return true if the current player lost his {@link King}
+     * @param piece    the {@link Piece} to move
      */
-    public boolean setPiece(Position position, Piece piece) {
-        boolean won = false;
-        Piece pieceOnSquare = getPiece(position);
-        if (pieceOnSquare instanceof King) {
-            won = true;
-        }
+    public void setPiece(Position position, Piece piece) {
         squares[position.getRow()][position.getCol()] = piece;
-        return won;
+    }
+
+    public void movePiece(Move move, Piece piece) {
+        Position from = move.getFrom();
+        Position to = move.getTo();
+
+        squares[to.getRow()][to.getCol()] = piece;
+        piece.setPosition(to);
+        setAlreadyMoved(piece);
+        squares[from.getRow()][from.getCol()] = null;
     }
 
     public boolean isEmpty(Position position) {
         return getPiece(position) == null;
+    }
+
+    public boolean isCheckMate(Color color) {
+        King king = null;
+
+        for (int row = 0; row < 8 && king == null; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece piece = squares[row][col];
+                if (piece instanceof King && piece.getColor().equals(color)) {
+                    king = (King) piece;
+                    break;
+                }
+            }
+        }
+
+        // No king
+        if (king == null) {
+            return true;
+        }
+
+        Position kingPos = king.getPosition();
+        // Can any enemy piece legally move to the king?
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece piece = squares[row][col];
+
+                if (piece != null && !piece.getColor().equals(color)) {
+                    Move move = new Move(piece.getPosition(), kingPos);
+
+                    if (piece.isValidMove(this, move)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void setAlreadyMoved(Piece piece) {
+        if (piece instanceof King king) {
+            king.setAlreadyMoved(true);
+        }
+
+        if (piece instanceof Rook rook) {
+            rook.setAlreadyMoved(true);
+        }
     }
 
     private void initializeBoard() {

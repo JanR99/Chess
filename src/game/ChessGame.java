@@ -50,12 +50,9 @@ public class ChessGame {
             moveCastlingRook(move);
         }
 
-        boolean won = board.setPiece(move.getTo(), piece);
-        piece.setPosition(move.getTo());
-        setAlreadyMoved(piece);
-        board.setPiece(move.getFrom(), null);
+        board.movePiece(move, piece);
 
-        if (won) {
+        if (board.isCheckMate(currentColorsTurn)) {
             endGame = true;
         }
 
@@ -87,16 +84,6 @@ public class ChessGame {
             }
         }
         return false;
-    }
-
-    private void setAlreadyMoved(Piece piece) {
-        if (piece instanceof King king) {
-            king.setAlreadyMoved(true);
-        }
-
-        if (piece instanceof Rook rook) {
-            rook.setAlreadyMoved(true);
-        }
     }
 
     private void transformPawnToQueenIfLastRow(Piece piece) {
