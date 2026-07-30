@@ -140,7 +140,6 @@ public class ChessGame {
         if (board.isCheckMate(currentColorsTurn)) {
             endGame = true;
         }
-        // TODO: Print Check if there is a check!
     }
 
     private boolean handlePromotionClick(Position clicked) {
