@@ -1,6 +1,12 @@
 package model;
 
+import pieces.Bishop;
+import pieces.Knight;
+import pieces.Queen;
+import pieces.Rook;
+
 import java.awt.*;
+import java.util.List;
 
 public abstract class Piece {
 
@@ -45,6 +51,15 @@ public abstract class Piece {
         }
 
         return true;
+    }
+
+    public static List<? extends Piece> getPromotableClasses(Position position, Color color) {
+        return List.of(
+            new Queen(position, color),
+            new Rook(position, color),
+            new Bishop(position, color),
+            new Knight(position, color)
+        );
     }
 
     public abstract boolean isValidMove(Board board, Move move);

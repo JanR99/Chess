@@ -8,6 +8,7 @@ import model.Position;
 import pieces.*;
 
 import java.awt.*;
+import java.util.List;
 
 public class ChessBoardRenderer implements IRenderable {
 
@@ -34,8 +35,41 @@ public class ChessBoardRenderer implements IRenderable {
 
         if (game.endGame) {
             drawWinScreen(g);
+        } else if (game.pendingPromotion != null) {
+            drawPromotionChooser(g, game.pendingPromotion, game.currentColorsTurn);
         } else {
             drawTurnIndicator(g);
+        }
+    }
+
+    private void drawPromotionChooser(Graphics2D g, Position pawnPos, Color color) {
+        // Dim the board so the picker reads as modal
+        g.setColor(new Color(0, 0, 0, 160));
+        g.fillRect(0, 0, 8 * TILE_SIZE, 8 * TILE_SIZE);
+
+        List<? extends Piece> choices = Piece.getPromotableClasses(pawnPos, color);
+        int col = pawnPos.getCol();
+        int pawnRow = pawnPos.getRow();
+        boolean downward = pawnRow == Position.FIRST_ROW;
+
+        for (int i = 0; i < choices.size(); i++) {
+            int row = downward ? pawnRow + i : pawnRow - i;
+            int x = col * TILE_SIZE;
+            int y = row * TILE_SIZE;
+
+            g.setColor(new Color(250, 250, 250));
+            g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            g.setColor(new Color(90, 90, 90));
+            g.drawRect(x, y, TILE_SIZE - 1, TILE_SIZE - 1);
+
+            String symbol = getUnicodeSymbol(choices.get(i));
+            g.setFont(new Font("Serif", Font.PLAIN, 48));
+            FontMetrics fm = g.getFontMetrics();
+            int textX = x + (TILE_SIZE - fm.stringWidth(symbol)) / 2;
+            int textY = y + (TILE_SIZE + fm.getAscent()) / 2 - 6;
+
+            g.setColor(new Color(30, 30, 30));
+            g.drawString(symbol, textX, textY);
         }
     }
 
