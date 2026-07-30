@@ -40,6 +40,7 @@ public class ChessGame {
             return false;
         }
 
+        // TODO This should also disable the player to make a move, while he is in check without removing the check
         // You are not allowed to make that move
         if (!piece.isValidMove(board, move)) {
             return false;
