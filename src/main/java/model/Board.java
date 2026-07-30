@@ -40,6 +40,46 @@ public class Board {
         return getPiece(position) == null;
     }
 
+    public boolean isCheck(Color color) {
+        King king = null;
+
+        // Find the king of the given color
+        for (int row = 0; row < 8 && king == null; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece piece = squares[row][col];
+
+                if (piece instanceof King && piece.getColor().equals(color)) {
+                    king = (King) piece;
+                    break;
+                }
+            }
+        }
+
+        // No king means the position is invalid
+        if (king == null) {
+            return false;
+        }
+
+        Position kingPos = king.getPosition();
+
+        // Check whether any enemy piece can attack the king
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Piece piece = squares[row][col];
+
+                if (piece != null && !piece.getColor().equals(color)) {
+                    Move move = new Move(piece.getPosition(), kingPos);
+
+                    if (piece.isValidMove(this, move)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public boolean isCheckMate(Color color) {
         King king = null;
 

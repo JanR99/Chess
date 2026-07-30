@@ -151,6 +151,9 @@ public class ChessBoardRenderer implements IRenderable {
 
     private void drawTurnIndicator(Graphics2D g) {
         String turn = game.currentColorsTurn.equals(Color.WHITE) ? "White to move" : "Black to move";
+        if (board.isCheck(game.currentColorsTurn)) {
+            turn += "\n CHECK!";
+        }
         g.setFont(new Font("SansSerif", Font.BOLD, 14));
         g.setColor(new Color(0, 0, 0, 150));
         g.fillRoundRect(6, 8 * TILE_SIZE + 4, 140, 24, 6, 6);
