@@ -81,40 +81,51 @@ public class Board {
     }
 
     public boolean isCheckMate(Color color) {
-        King king = null;
-
-        for (int row = 0; row < 8 && king == null; row++) {
-            for (int col = 0; col < 8; col++) {
-                Piece piece = squares[row][col];
-                if (piece instanceof King && piece.getColor().equals(color)) {
-                    king = (King) piece;
-                    break;
-                }
-            }
+        // A player cannot be in checkmate if they are not in check.
+        if (!isCheck(color)) {
+            return false;
         }
 
-        // No king
-        if (king == null) {
-            return true;
-        }
-
-        Position kingPos = king.getPosition();
-        // Can any enemy piece legally move to the king?
+        // Try every piece belonging to the player.
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Piece piece = squares[row][col];
+                if (piece == null || !piece.getColor().equals(color)) {
+                    continue;
+                }
+                Position from = piece.getPosition();
+                // Try every possible destination.
+                for (int targetRow = 0; targetRow < 8; targetRow++) {
+                    for (int targetCol = 0; targetCol < 8; targetCol++) {
+                        Position to = new Position(targetRow, targetCol);
+                        Move move = new Move(from, to);
+                        if (!piece.isValidMove(this, move)) {
+                            continue;
+                        }
+                        Piece capturedPiece = getPiece(to);
 
-                if (piece != null && !piece.getColor().equals(color)) {
-                    Move move = new Move(piece.getPosition(), kingPos);
+                        // Make the move temporarily.
+                        setPiece(from, null);
+                        setPiece(to, piece);
+                        piece.setPosition(to);
 
-                    if (piece.isValidMove(this, move)) {
-                        return true;
+                        // If the king is no longer in check, this is a legal escape.
+                        boolean stillInCheck = isCheck(color);
+
+                        // Undo the move.
+                        setPiece(from, piece);
+                        setPiece(to, capturedPiece);
+                        piece.setPosition(from);
+
+                        if (!stillInCheck) {
+                            return false;
+                        }
                     }
                 }
             }
         }
-
-        return false;
+        // The king is in check and no legal move escapes it.
+        return true;
     }
 
     private void setAlreadyMoved(Piece piece) {
