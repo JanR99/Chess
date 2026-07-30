@@ -90,14 +90,12 @@ public class ChessGame {
 
     private void transformPawnToQueenIfLastRow(Piece piece) {
         if (!(piece instanceof Pawn)) {
-            System.out.println("Ist kein Pawn");
             return;
         }
         if (piece.getColor().equals(Color.WHITE) && piece.getPosition().getRow() == Position.FIRST_ROW
                 || piece.getColor().equals(Color.BLACK) && piece.getPosition().getRow() == Position.LAST_ROW) {
             // TODO let the User decide which Piece
             board.setPiece(piece.getPosition(), new Queen(piece.getPosition(), piece.getColor()));
-            System.out.println( board.getPiece(piece.getPosition()));
         }
     }
 
