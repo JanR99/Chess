@@ -4,6 +4,7 @@ import model.*;
 import pieces.*;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChessGame {
@@ -60,6 +61,35 @@ public class ChessGame {
 
         finalizeMove();
         return true;
+    }
+
+    /**
+     * Returns every square the piece at {@code from} is currently allowed to move to,
+     * used by the renderer to draw move-hint dots. Mirrors the same legality check
+     * {@link #makeMove(Move)} uses, minus the turn/ownership guard (the caller already
+     * only asks this for the currently selected piece).
+     */
+    public List<Position> getLegalMoves(Position from) {
+        List<Position> moves = new ArrayList<>();
+        if (from == null) return moves;
+
+        Piece piece = board.getPiece(from);
+        if (piece == null) return moves;
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (row == from.getRow() && col == from.getCol()) continue;
+
+                Position to = new Position(row, col);
+                Piece target = board.getPiece(to);
+                if (target != null && target.getColor().equals(piece.getColor())) continue;
+
+                if (piece.isValidMove(board, new Move(from, to))) {
+                    moves.add(to);
+                }
+            }
+        }
+        return moves;
     }
 
     public boolean handleSquareClick(Position clicked) {

@@ -25,6 +25,8 @@ public class ChessBoardRenderer implements IRenderable {
     private static final Color PANEL_BORDER   = new Color(255, 255, 255, 30);
     private static final Color GOLD           = new Color(240, 190,  80);
     private static final Color CHECK_RED      = new Color(220,  70,  70);
+    private static final Color MOVE_HINT      = new Color(255, 205, 0, 180);
+    private static final Color CAPTURE_HINT   = new Color(255, 205, 0, 200);
 
     public ChessBoardRenderer(Board board, ChessGame game) {
         this.board = board;
@@ -51,6 +53,7 @@ public class ChessBoardRenderer implements IRenderable {
 
     private void drawBoard(Graphics2D g) {
         Position selected = game.selectedPosition;
+        List<Position> legalMoves = game.getLegalMoves(selected);
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -71,6 +74,8 @@ public class ChessBoardRenderer implements IRenderable {
             }
         }
 
+        drawMoveHints(g, legalMoves);
+
         // Thin outer frame around the whole board for a "mounted" look
         g.setColor(new Color(40, 30, 22));
         g.setStroke(new BasicStroke(3f));
@@ -90,6 +95,30 @@ public class ChessBoardRenderer implements IRenderable {
             boolean leftLight = (i) % 2 == 0;
             g.setColor(leftLight ? DARK_SQUARE : LIGHT_SQUARE);
             g.drawString(String.valueOf(8 - i), 6, i * TILE_SIZE + 15);
+        }
+    }
+
+    private void drawMoveHints(Graphics2D g, List<Position> legalMoves) {
+        for (Position pos : legalMoves) {
+            int x = pos.getCol() * TILE_SIZE;
+            int y = pos.getRow() * TILE_SIZE;
+            boolean isCapture = board.getPiece(pos) != null;
+
+            if (isCapture) {
+                // Ring around the edge of the square, chess.com-style, so the target piece stays visible
+                int inset = 6;
+                g.setColor(CAPTURE_HINT);
+                g.setStroke(new BasicStroke(4f));
+                g.drawOval(x + inset, y + inset, TILE_SIZE - inset * 2, TILE_SIZE - inset * 2);
+                g.setStroke(new BasicStroke(1f));
+            } else {
+                // Small filled dot centered on empty target squares
+                int dotSize = 22;
+                int dotX = x + (TILE_SIZE - dotSize) / 2;
+                int dotY = y + (TILE_SIZE - dotSize) / 2;
+                g.setColor(MOVE_HINT);
+                g.fillOval(dotX, dotY, dotSize, dotSize);
+            }
         }
     }
 
