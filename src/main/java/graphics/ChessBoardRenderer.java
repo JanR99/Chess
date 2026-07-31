@@ -207,7 +207,7 @@ public class ChessBoardRenderer implements IRenderable {
     }
 
     private void drawWinScreen(Graphics2D g) {
-        String winner = game.currentColorsTurn.equals(Color.WHITE) ? "White" : "Black";
+        String winner = game.winner.equals(Color.WHITE) ? "White" : "Black";
 
         // Dim + subtle vertical gradient for polish
         GradientPaint fade = new GradientPaint(

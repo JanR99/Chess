@@ -104,6 +104,10 @@ public class Board {
                         }
                         Piece capturedPiece = getPiece(to);
 
+                        if (capturedPiece != null && capturedPiece.getColor().equals(color)) {
+                            continue;
+                        }
+
                         // Make the move temporarily.
                         setPiece(from, null);
                         setPiece(to, piece);

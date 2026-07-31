@@ -13,6 +13,7 @@ public class ChessGame {
     private final Player playerBlack;
     private final Player playerWhite;
     public Color currentColorsTurn = Color.WHITE;
+    public Color winner = null;
     public Position selectedPosition = null;
     public Position pendingPromotion = null;
     public boolean endGame = false;
@@ -41,9 +42,28 @@ public class ChessGame {
             return false;
         }
 
-        // TODO This should also disable the player to make a move, while he is in check without removing the check
         // You are not allowed to make that move
         if (!piece.isValidMove(board, move)) {
+            return false;
+        }
+
+        // Don't allow a move that leaves your own king in check.
+        Piece captured = board.getPiece(move.getTo());
+        Position from = move.getFrom();
+        Position to = move.getTo();
+
+        board.setPiece(from, null);
+        board.setPiece(to, piece);
+        piece.setPosition(to);
+
+        boolean leavesKingInCheck = board.isCheck(currentColorsTurn);
+
+        // Undo
+        board.setPiece(from, piece);
+        board.setPiece(to, captured);
+        piece.setPosition(from);
+
+        if (leavesKingInCheck) {
             return false;
         }
 
@@ -110,8 +130,7 @@ public class ChessGame {
             Move move = new Move(selectedPosition, clicked);
             selectedPosition = null;  // clear selection regardless of outcome
             boolean moved = makeMove(move);
-            if (moved && !endGame && pendingPromotion == null) {
-                rotatePlayersTurn();
+            if (moved) {
                 return true;
             }
             // Re-select if they clicked another own piece
@@ -167,8 +186,13 @@ public class ChessGame {
     }
 
     private void finalizeMove() {
+        rotatePlayersTurn();
+
         if (board.isCheckMate(currentColorsTurn)) {
             endGame = true;
+            winner = currentColorsTurn.equals(Color.WHITE)
+                    ? Color.BLACK
+                    : Color.WHITE;
         }
     }
 
@@ -183,11 +207,7 @@ public class ChessGame {
         pendingPromotion = null;
         finalizeMove();
 
-        if (!endGame) {
-            rotatePlayersTurn();
-            return true;
-        }
-        return false;
+        return !endGame;
     }
 
     private Piece getPromotionChoiceAt(Position clicked) {
