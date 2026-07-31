@@ -19,6 +19,7 @@ public class ChessApp {
 
         MouseInputHandler inputHandler = new MouseInputHandler(chessGame);
         Input.mouse().onClicked(inputHandler::onMouseClicked);
+        Input.mouse().onDragged(inputHandler::onMouseClicked);
 
         Game.start();
     }
