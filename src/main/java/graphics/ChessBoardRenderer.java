@@ -8,6 +8,7 @@ import model.Position;
 import pieces.*;
 
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.List;
 
 public class ChessBoardRenderer implements IRenderable {
@@ -15,10 +16,15 @@ public class ChessBoardRenderer implements IRenderable {
     private final Board board;
     private final ChessGame game;
     public static final int TILE_SIZE = 80;
+    private static final int BOARD_PX = 8 * TILE_SIZE;
 
-    private static final Color LIGHT_SQUARE  = new Color(240, 217, 181);
-    private static final Color DARK_SQUARE   = new Color(181, 136,  99);
-    private static final Color HIGHLIGHT     = new Color(255, 255,  0, 120);
+    private static final Color LIGHT_SQUARE   = new Color(238, 216, 192);
+    private static final Color DARK_SQUARE    = new Color(150, 111,  87);
+    private static final Color SELECTED_TINT  = new Color(255, 214,  10, 130);
+    private static final Color PANEL_BG       = new Color(24, 22, 20, 210);
+    private static final Color PANEL_BORDER   = new Color(255, 255, 255, 30);
+    private static final Color GOLD           = new Color(240, 190,  80);
+    private static final Color CHECK_RED      = new Color(220,  70,  70);
 
     public ChessBoardRenderer(Board board, ChessGame game) {
         this.board = board;
@@ -29,6 +35,7 @@ public class ChessBoardRenderer implements IRenderable {
     public void render(Graphics2D g) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,    RenderingHints.VALUE_STROKE_PURE);
 
         drawBoard(g);
         drawPieces(g);
@@ -42,61 +49,6 @@ public class ChessBoardRenderer implements IRenderable {
         }
     }
 
-    private void drawPromotionChooser(Graphics2D g, Position pawnPos, Color color) {
-        // Dim the board so the picker reads as modal
-        g.setColor(new Color(0, 0, 0, 160));
-        g.fillRect(0, 0, 8 * TILE_SIZE, 8 * TILE_SIZE);
-
-        List<? extends Piece> choices = Piece.getPromotableClasses(pawnPos, color);
-        int col = pawnPos.getCol();
-        int pawnRow = pawnPos.getRow();
-        boolean downward = pawnRow == Position.FIRST_ROW;
-
-        for (int i = 0; i < choices.size(); i++) {
-            int row = downward ? pawnRow + i : pawnRow - i;
-            int x = col * TILE_SIZE;
-            int y = row * TILE_SIZE;
-
-            g.setColor(new Color(250, 250, 250));
-            g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-            g.setColor(new Color(90, 90, 90));
-            g.drawRect(x, y, TILE_SIZE - 1, TILE_SIZE - 1);
-
-            String symbol = getUnicodeSymbol(choices.get(i));
-            g.setFont(new Font("Serif", Font.PLAIN, 48));
-            FontMetrics fm = g.getFontMetrics();
-            int textX = x + (TILE_SIZE - fm.stringWidth(symbol)) / 2;
-            int textY = y + (TILE_SIZE + fm.getAscent()) / 2 - 6;
-
-            g.setColor(new Color(30, 30, 30));
-            g.drawString(symbol, textX, textY);
-        }
-    }
-
-    private void drawWinScreen(Graphics2D g) {
-        String winner = game.currentColorsTurn.equals(Color.WHITE) ? "White" : "Black";
-
-        g.setColor(new Color(0, 0, 0, 160));
-        g.fillRect(0, 0, 8 * TILE_SIZE, 8 * TILE_SIZE);
-
-        // Winner banner
-        g.setColor(new Color(255, 215, 0));  // gold
-        g.setFont(new Font("SansSerif", Font.BOLD, 48));
-        FontMetrics fm = g.getFontMetrics();
-        String line1 = winner + " wins!";
-        g.drawString(line1,
-                (8 * TILE_SIZE - fm.stringWidth(line1)) / 2,
-                (8 * TILE_SIZE) / 2 - 10);
-
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        fm = g.getFontMetrics();
-        String line2 = "Close the window to exit.";
-        g.drawString(line2,
-                (8 * TILE_SIZE - fm.stringWidth(line2)) / 2,
-                (8 * TILE_SIZE) / 2 + 30);
-    }
-
     private void drawBoard(Graphics2D g) {
         Position selected = game.selectedPosition;
 
@@ -108,24 +60,43 @@ public class ChessBoardRenderer implements IRenderable {
 
                 // Highlight selected square
                 if (selected != null && selected.getRow() == row && selected.getCol() == col) {
-                    g.setColor(HIGHLIGHT);
+                    // Soft glow fill + crisp border so the selection reads clearly on both square colors
+                    g.setColor(SELECTED_TINT);
                     g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    g.setColor(new Color(255, 200, 0));
+                    g.setStroke(new BasicStroke(3f));
+                    g.drawRect(col * TILE_SIZE + 1, row * TILE_SIZE + 1, TILE_SIZE - 3, TILE_SIZE - 3);
+                    g.setStroke(new BasicStroke(1f));
                 }
             }
         }
 
-        // Draw rank/file labels
-        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        // Thin outer frame around the whole board for a "mounted" look
+        g.setColor(new Color(40, 30, 22));
+        g.setStroke(new BasicStroke(3f));
+        g.drawRect(1, 1, BOARD_PX - 2, BOARD_PX - 2);
+        g.setStroke(new BasicStroke(1f));
+
+        // Rank/file labels, tucked into square corners
+        g.setFont(new Font("SansSerif", Font.BOLD, 11));
         for (int i = 0; i < 8; i++) {
-            g.setColor((i % 2 == 0) ? DARK_SQUARE : LIGHT_SQUARE);
-            g.drawString(String.valueOf((char)('a' + i)), i * TILE_SIZE + 4, 8 * TILE_SIZE - 4);
-            g.drawString(String.valueOf(8 - i), 4, i * TILE_SIZE + 14);
+            // files along the bottom row
+            boolean bottomLight = (7 + i) % 2 == 0;
+            g.setColor(bottomLight ? DARK_SQUARE : LIGHT_SQUARE);
+            g.drawString(String.valueOf((char) ('a' + i)),
+                    i * TILE_SIZE + TILE_SIZE - 12, BOARD_PX - 6);
+
+            // ranks along the left column
+            boolean leftLight = (i) % 2 == 0;
+            g.setColor(leftLight ? DARK_SQUARE : LIGHT_SQUARE);
+            g.drawString(String.valueOf(8 - i), 6, i * TILE_SIZE + 15);
         }
     }
 
     private void drawPieces(Graphics2D g) {
-        Font pieceFont = new Font("Serif", Font.PLAIN, 56);
+        Font pieceFont = new Font("Serif", Font.PLAIN, 58);
         g.setFont(pieceFont);
+        FontMetrics fm = g.getFontMetrics();
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -135,30 +106,153 @@ public class ChessBoardRenderer implements IRenderable {
                 String symbol = getUnicodeSymbol(piece);
                 int x = col * TILE_SIZE;
                 int y = row * TILE_SIZE;
+                int textX = x + (TILE_SIZE - fm.stringWidth(symbol)) / 2;
+                int textY = y + (TILE_SIZE + fm.getAscent() - fm.getDescent()) / 2;
 
-                // Draw a subtle shadow first for contrast on both square colors
-                g.setColor(new Color(0, 0, 0, 60));
-                g.drawString(symbol, x + 13, y + 60);
+                boolean isWhite = piece.getColor().equals(Color.WHITE);
 
-                // Draw the piece
-                g.setColor(piece.getColor().equals(Color.WHITE)
-                        ? new Color(255, 255, 255)
-                        : new Color(20, 20, 20));
-                g.drawString(symbol, x + 12, y + 59);
+                // Soft drop shadow for depth
+                g.setColor(new Color(0, 0, 0, 70));
+                g.drawString(symbol, textX + 2, textY + 3);
+
+                // Piece body
+                g.setColor(isWhite ? new Color(250, 250, 250) : new Color(25, 25, 25));
+                g.drawString(symbol, textX, textY);
+
+                // Thin contrasting outline pass for white pieces so they don't wash out on light squares
+                if (isWhite) {
+                    g.setColor(new Color(40, 40, 40, 90));
+                    g.drawString(symbol, textX + 1, textY);
+                }
             }
         }
     }
 
-    private void drawTurnIndicator(Graphics2D g) {
-        String turn = game.currentColorsTurn.equals(Color.WHITE) ? "White to move" : "Black to move";
-        if (board.isCheck(game.currentColorsTurn)) {
-            turn += "\n CHECK!";
+    private void drawPromotionChooser(Graphics2D g, Position pawnPos, Color color) {
+        g.setColor(new Color(0, 0, 0, 170));
+        g.fillRect(0, 0, BOARD_PX, BOARD_PX);
+
+        List<? extends Piece> choices = Piece.getPromotableClasses(pawnPos, color);
+        int col = pawnPos.getCol();
+        int pawnRow = pawnPos.getRow();
+        boolean downward = pawnRow == Position.FIRST_ROW;
+
+        // Backing panel behind the choice tiles
+        int panelX = col * TILE_SIZE - 6;
+        int panelTop = downward ? -6 : (pawnRow - choices.size() + 1) * TILE_SIZE - 6;
+        int panelH = choices.size() * TILE_SIZE + 12;
+        g.setColor(PANEL_BG);
+        g.fill(new RoundRectangle2D.Float(panelX, panelTop, TILE_SIZE + 12, panelH, 14, 14));
+        g.setColor(PANEL_BORDER);
+        g.draw(new RoundRectangle2D.Float(panelX, panelTop, TILE_SIZE + 12, panelH, 14, 14));
+
+        for (int i = 0; i < choices.size(); i++) {
+            int row = downward ? pawnRow + i : pawnRow - i;
+            int x = col * TILE_SIZE;
+            int y = row * TILE_SIZE;
+
+            g.setColor(new Color(252, 250, 246));
+            g.fill(new RoundRectangle2D.Float(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8, 10, 10));
+            g.setColor(GOLD);
+            g.setStroke(new BasicStroke(2f));
+            g.draw(new RoundRectangle2D.Float(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8, 10, 10));
+            g.setStroke(new BasicStroke(1f));
+
+            String symbol = getUnicodeSymbol(choices.get(i));
+            g.setFont(new Font("Serif", Font.PLAIN, 44));
+            FontMetrics fm = g.getFontMetrics();
+            int textX = x + (TILE_SIZE - fm.stringWidth(symbol)) / 2;
+            int textY = y + (TILE_SIZE + fm.getAscent() - fm.getDescent()) / 2;
+
+            g.setColor(new Color(35, 30, 25));
+            g.drawString(symbol, textX, textY);
         }
-        g.setFont(new Font("SansSerif", Font.BOLD, 14));
-        g.setColor(new Color(0, 0, 0, 150));
-        g.fillRoundRect(6, 8 * TILE_SIZE + 4, 140, 24, 6, 6);
+
+        // Caption above/below the picker
+        g.setFont(new Font("SansSerif", Font.BOLD, 13));
         g.setColor(Color.WHITE);
-        g.drawString(turn, 12, 8 * TILE_SIZE + 21);
+        String caption = "Choose promotion";
+        FontMetrics cfm = g.getFontMetrics();
+        int capY = downward ? panelTop - 6 : panelTop + panelH + 16;
+        g.drawString(caption, panelX + (TILE_SIZE + 12 - cfm.stringWidth(caption)) / 2, capY);
+    }
+
+    private void drawWinScreen(Graphics2D g) {
+        String winner = game.currentColorsTurn.equals(Color.WHITE) ? "White" : "Black";
+
+        // Dim + subtle vertical gradient for polish
+        GradientPaint fade = new GradientPaint(
+                0, 0, new Color(0, 0, 0, 140),
+                0, BOARD_PX, new Color(0, 0, 0, 190));
+        Paint oldPaint = g.getPaint();
+        g.setPaint(fade);
+        g.fillRect(0, 0, BOARD_PX, BOARD_PX);
+        g.setPaint(oldPaint);
+
+        // Card behind the text
+        int cardW = 320, cardH = 130;
+        int cardX = (BOARD_PX - cardW) / 2;
+        int cardY = (BOARD_PX - cardH) / 2;
+        g.setColor(PANEL_BG);
+        g.fill(new RoundRectangle2D.Float(cardX, cardY, cardW, cardH, 18, 18));
+        g.setColor(GOLD);
+        g.setStroke(new BasicStroke(2f));
+        g.draw(new RoundRectangle2D.Float(cardX, cardY, cardW, cardH, 18, 18));
+        g.setStroke(new BasicStroke(1f));
+
+        g.setColor(GOLD);
+        g.setFont(new Font("SansSerif", Font.BOLD, 34));
+        FontMetrics fm = g.getFontMetrics();
+        String line1 = winner + " wins!";
+        g.drawString(line1, (BOARD_PX - fm.stringWidth(line1)) / 2, cardY + 58);
+
+        g.setColor(new Color(225, 225, 225));
+        g.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        fm = g.getFontMetrics();
+        String line2 = "Checkmate — game over";
+        g.drawString(line2, (BOARD_PX - fm.stringWidth(line2)) / 2, cardY + 86);
+
+        g.setColor(new Color(170, 170, 170));
+        g.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        fm = g.getFontMetrics();
+        String line3 = "Close the window to exit";
+        g.drawString(line3, (BOARD_PX - fm.stringWidth(line3)) / 2, cardY + 108);
+    }
+
+    private void drawTurnIndicator(Graphics2D g) {
+        boolean whiteTurn = game.currentColorsTurn.equals(Color.WHITE);
+        boolean inCheck = board.isCheck(game.currentColorsTurn);
+
+        String label = (whiteTurn ? "White" : "Black") + " to move" + (inCheck ? "  •  CHECK" : "");
+
+        g.setFont(new Font("SansSerif", Font.BOLD, 14));
+        FontMetrics fm = g.getFontMetrics();
+        int textW = fm.stringWidth(label);
+        int pillW = textW + 46;
+        int pillH = 28;
+        int pillX = 6;
+        int pillY = BOARD_PX + 6;
+
+        g.setColor(inCheck ? new Color(60, 20, 20, 220) : PANEL_BG);
+        g.fill(new RoundRectangle2D.Float(pillX, pillY, pillW, pillH, 8, 8));
+        if (inCheck) {
+            g.setColor(CHECK_RED);
+            g.setStroke(new BasicStroke(1.5f));
+            g.draw(new RoundRectangle2D.Float(pillX, pillY, pillW, pillH, 8, 8));
+            g.setStroke(new BasicStroke(1f));
+        }
+
+        // Color swatch showing whose turn it is
+        int dotSize = 14;
+        int dotX = pillX + 10;
+        int dotY = pillY + (pillH - dotSize) / 2;
+        g.setColor(whiteTurn ? Color.WHITE : new Color(30, 30, 30));
+        g.fillOval(dotX, dotY, dotSize, dotSize);
+        g.setColor(new Color(255, 255, 255, 120));
+        g.drawOval(dotX, dotY, dotSize, dotSize);
+
+        g.setColor(inCheck ? new Color(255, 210, 210) : Color.WHITE);
+        g.drawString(label, dotX + dotSize + 8, pillY + pillH - 9);
     }
 
     private String getUnicodeSymbol(Piece piece) {
